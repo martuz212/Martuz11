@@ -10,7 +10,7 @@ var map = L.map('map').setView([6.210732, -75.573817], 15);
 var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '© OpenStreetMap'
-});
+}).addTo(map);
 
 var osmHOT = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
     maxZoom: 19,
@@ -56,3 +56,68 @@ var overlayMaps = {
 };
 
 var layerControl = L.control.layers(baseMaps, overlayMaps).addTo(map);
+
+// Cargar el archivo GeoJSON
+// fetch('/Geojson/json_barrios_medellin.geojson')
+//     .then(response => response.json())
+//     .then(data => {
+//         // Añadir el GeoJSON al mapa con estilos y eventos
+//         L.geoJSON(data, {
+//             //añado estilo de una variable
+//         style: estilo_barrio
+
+    
+//         }).addTo(map);
+//     })
+//     .catch(err => console.error('Error cargando el archivo GeoJSON: ', err));
+// // añado la variable con el estilo
+//     var estilo_barrio ={
+//         "color": "#FFC0CB",
+//         "weight": 5,
+//         "opacity": 0.65}
+
+// Cargar el archivo GeoJSON
+fetch('/Geojson/json_barrios_medellin.geojson')
+    .then(response => response.json())
+    .then(data => {
+        // Añadir el GeoJSON al mapa con estilos y eventos
+        L.geoJSON(data, {
+            style: estiloBarrio,  // Aplica la función de estilo
+            onEachFeature: function (feature, layer) {
+              // Añadir popups para los barrios
+              if (feature.properties && feature.properties.nombre_bar) {
+                layer.bindPopup("Barrio: " + feature.properties.nombre_bar);
+              }
+            }
+        }).addTo(map);
+    })
+    .catch(err => console.error('Error cargando el archivo GeoJSON: ', err));
+
+// Función de estilo para personalizar el color de los barrios
+function estiloBarrio(feature) {
+    var baseStyle = {
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.7
+    };
+
+    // Ajustar el color en función del nombre del barrio
+    switch (feature.properties.nombre_bar) {
+        case 'Laureles':   // Cambia 'Laureles' por el nombre real del barrio en el GeoJSON
+            baseStyle.color = '#ff0000';  // Color rojo para el borde
+            baseStyle.fillColor = '#ffb3b3';  // Color de relleno rojo claro
+            break;
+        case 'La Floresta':
+            baseStyle.color = '#00ff00';  // Color verde para el borde
+            baseStyle.fillColor = '#b3ffb3';  // Color de relleno verde claro
+            break;
+        case 'Las Palmas':
+            baseStyle.color = '#0000ff';  // Color azul para el borde
+            baseStyle.fillColor = '#b3b3ff';  // Color de relleno azul claro
+            break;
+        default:
+            baseStyle.color = '#cccccc';  // Color gris para el borde
+            baseStyle.fillColor = '#e6e6e6';  // Color de relleno gris claro
+    }
+    return baseStyle;
+}
